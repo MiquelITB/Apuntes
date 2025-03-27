@@ -82,9 +82,15 @@ Són aquelles que es podran utilitzar en tot tipus d’organitzacions o per usua
 2. Aplicacions verticals:
 Són aquelles aplicacions creades amb un propòsit molt concret o concebudes per realitzar tasques molt específiques dins d’un sector o activitat professional. Alguns exemples serien programes per gestionar una clínica dental, per reserva bitllets...
 
+
+## Aplicacions Portables
+
+Encara que la major part d’aplicacions requereixen d’algun tipus de procés d’instal·lació per ser utilitzades en un ordinador determinat, aquesta condició no és sempre necessària, ja que depenent del disseny del programari, aquest pot ser autocontingut i no necessitar dependències en llibreries del sistema per funcionar.
+
 Una aplicació portable és un programa d’ordinador dissenyat per funcionar sense necessitat d’estar instal·lat en un sistema operatiu.
 
 Les aplicacions portables es poden executar en qualsevol sistema amb què siguin compatibles, però normalment requeriran un sistema operatiu concret.
+
 
 ## Emmagatzemmatge:
 
