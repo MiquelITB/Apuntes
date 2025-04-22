@@ -6,6 +6,10 @@ sudo apt install proftpd
 sudo nano /etc/proftpd/proftpd.conf
 ServerType standalone
 
+Generar un fitcher per usuari y contrasenya y vincularlo al .conf
+sudo nano /etc/proftpd/ftpusers.txt
+usuario1:contrasenya
+
 Per crear usuaris virtuals
 Primero, instala ftpasswd (parte del paquete proftpd-utils, puede que ya lo tengas):
 
