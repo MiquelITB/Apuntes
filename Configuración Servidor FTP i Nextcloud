@@ -1,0 +1,49 @@
+sudo apt update
+sudo apt upgrade
+
+sudo apt install proftpd
+
+sudo nano /etc/proftpd/proftpd.conf
+ServerType standalone
+
+Per crear usuaris virtuals
+Primero, instala ftpasswd (parte del paquete proftpd-utils, puede que ya lo tengas):
+
+sudo apt install proftpd-utils
+
+Crea el archivo de usuarios virtuales:
+
+sudo ftpasswd --passwd --name=usuario1 --file=/etc/proftpd/ftpd.passwd --uid=33 --gid=33 --home=/var/ftp/usuario1 --shell=/bin/false
+sudo ftpasswd --passwd --name=usuario2 --file=/etc/proftpd/ftpd.passwd --uid=33 --gid=33 --home=/var/ftp/usuario2 --shell=/bin/false
+
+El UID/GID 33 es el de www-data o nobody en algunos sistemas, puedes usar otro pero asegúrate que sea válido. 
+El --shell=/bin/false bloquea el acceso SSH.
+
+Edita /etc/proftpd/proftpd.conf:
+
+ServerType standalone
+DefaultRoot ~
+AuthUserFile /etc/proftpd/ftpd.passwd
+RequireValidShell off
+
+Si quieres restringir el acceso y limitar usuarios:
+
+
+<Limit LOGIN>
+  AllowUser usuario1 usuario2
+  DenyAll
+</Limit>
+
+Reinicia ProFTPD
+
+sudo systemctl restart proftpd
+
+Probar conexión desde cliente Ubuntu
+ftp IP_DEL_SERVIDOR
+
+Ingresa el usuario y la contraseña que creaste.
+
+Prueba de subir/descargar archivos:
+
+put archivo.txt      # para subir
+get archivo.txt      # para descargar
