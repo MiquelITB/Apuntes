@@ -1,11 +1,10 @@
 
-# 📝 Apuntes de Configuración NFS (Ubuntu servidor y Windows cliente)
-
-## 📂 Archivos de configuración utilizados
+# Apunts de Configuració NFS
+## Arxius
 
 - `/etc/exports`: Archivo principal en el servidor NFS donde se definen las carpetas compartidas y los permisos de acceso.
 
-## 🧾 Comandos utilizados en Ubuntu (Servidor NFS)
+## Comandes Ubuntu (Servidor NFS)
 
 ```bash
 # Actualizar repositorios e instalar el servidor NFS
@@ -16,22 +15,14 @@ sudo apt install nfs-kernel-server
 
 ```bash
 # Crear directorios que se compartirán
-sudo mkdir -p /ubuntunfs/nfs1Miquel
-sudo mkdir -p /ubuntunfs/nfs2Miquel
-sudo mkdir -p /ubuntunfs/nfs3anonim
+sudo mkdir -p /ubi/comp
 ```
 > Crea las carpetas locales que serán exportadas por NFS.
 
 ```bash
 # Asignar propietarios y permisos
-sudo chown -R usuario:grupo /ubuntunfs/nfs1Miquel
-sudo chmod 755 /ubuntunfs/nfs1Miquel
-
-sudo chown -R usuario:grupo /ubuntunfs/nfs2Miquel
-sudo chmod 777 /ubuntunfs/nfs2Miquel
-
-sudo chown -R nobody:nogroup /ubuntunfs/nfs3anonim
-sudo chmod 777 /ubuntunfs/nfs3anonim
+sudo chown -R usuario:grupo /ubi/comp
+sudo chmod 755 /ubi/comp
 ```
 > Establece permisos adecuados para controlar el acceso.
 
@@ -43,9 +34,9 @@ sudo nano /etc/exports
 
 Ejemplo de contenido:
 ```
-/ubuntunfs/nfs1Miquel *(ro,sync)
-/ubuntunfs/nfs2Miquel 192.168.1.100(rw,sync)
-/ubuntunfs/nfs3anonim *(rw,sync,no_subtree_check,anonuid=65534,anongid=65534)
+/ubi/comp1 *(ro,sync)
+/ubi/comp2 192.168.1.100(rw,sync)
+/ubi/comp3 *(rw,sync,no_subtree_check,anonuid=65534,anongid=65534)
 ```
 
 ```bash
@@ -57,7 +48,7 @@ sudo systemctl restart nfs-kernel-server
 
 ---
 
-## 🧾 Comandos utilizados en Windows Server (Cliente NFS)
+## Comandos utilizados en Windows Server (Cliente NFS)
 
 ```powershell
 # Instalar el cliente NFS
@@ -67,7 +58,7 @@ Install-WindowsFeature NFS-Client
 
 ```powershell
 # Ver exportaciones NFS disponibles desde el servidor Ubuntu
-showmount -e 192.168.1.50
+showmount -e ip
 ```
 > Muestra las carpetas compartidas por NFS desde la IP indicada.
 
@@ -88,6 +79,6 @@ echo prueba > test.txt
 > Accede a la carpeta montada y prueba los permisos de escritura.
 ```
 
-# 📌 Notas
+# Notas
 - Reemplazar `usuario:grupo` por el propietario real en Ubuntu.
 - Reemplazar `192.168.1.50` con la IP de tu servidor Ubuntu.
