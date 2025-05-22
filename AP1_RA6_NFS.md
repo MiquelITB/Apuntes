@@ -1,5 +1,5 @@
 
-# Apunts de Configuració NFS
+#Configuració NFS
 ## Arxius
 
 - `/etc/exports`: Archivo principal en el servidor NFS donde se definen las carpetas compartidas y los permisos de acceso.
