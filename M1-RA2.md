@@ -1,5 +1,5 @@
 ## Configuració de xarxa
-Xarxa NAT a VirtualBox: Herramientas > Redes NAT > Crear
+Xarxa NAT a VirtualBox: Herramientas > Administrador de reds > Redes NAT > Crear
 
 
 ## etc/group: nom_grup:contraseña_cifrada:GID:listado_miembros
@@ -15,4 +15,7 @@ Xarxa NAT a VirtualBox: Herramientas > Redes NAT > Crear
   3. useradd: Crear usuarios (-m per crear una home i -aG per afegir usuari al grup, sense eliminar al que esta)
   4. usermod: Modificar usuarios (-s per definir la shell. [/bin/bash o /sbin/nologin])
   5. userdel: Eliminar usuarios
-## /etc/security/pwquality.conf: 
+## /etc/security/pwquality.conf: Es defineix les polítiques de contraseñas del sistema
+
+## /etc/passwd: usuari:contraseña:UID:GID:descripció:home:shell
+  1. cut: per extreure seccions o camps (-d per definir el delimitador -f per indicar quin camp ej.[cut -d: -f3])
