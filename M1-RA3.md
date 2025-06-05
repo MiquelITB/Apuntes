@@ -52,10 +52,17 @@ El sistema de fitxers d'Ubuntu (i Linux en general) s'estructura a partir d'un d
         * Si l'original s'esborra, l'enllaç simbòlic queda "trencat".
         * Ex: `ln -s /ruta/fitxer_original /ruta/enllac`
     * **Enllaç Dur (Hard Link)**
-        * Una entrada addicional que apunta al mateix "inode" (les dades reals) d'un fitxer.
+        * Una entrada addicional que apunta al mateix "**inode**" (les dades reals) d'un fitxer.
         * El fitxer no s'esborra completament fins que tots els enllaços durs que apunten a ell són eliminats.
         * Només funciona dins del mateix sistema de fitxers.
         * Ex: `ln /ruta/fitxer_original /ruta/enllac`
+
+* **Partició:** És una divisió física d'un disc dur. Un disc es pot dividir en una o diverses particions. Aquestes divisions són fixes i es defineixen directament sobre l'espai brut del disc.
+
+* **LVM (Logical Volume Management)**
+    * **Volum Físic (PV)**: És un disc dur sencer o una partició d'un disc dur que ha estat inicialitzat per a ser utilitzat per LVM.
+    * **Grups de Volums (VG)**: És una agrupació lògica d'un o més PV.
+    * **Volums Lògics (LV)**: Són les "**particions**" que l'usuari final veu i amb les quals interactua. Un LV es crea dins d'un VG.
      
 ---
 # Sistema de Fitxers a Windows
@@ -91,6 +98,29 @@ A Windows, tot s'organitza al voltant de **unitats lògiques** (Ex: $C:$, $D:$).
 
 ---
 ## Formateig i Nomenclatura de Dispositius
+
+### Passos Clau del Flux de Treball LVM
+
+1.  **Preparar Volums Físics (PVs)**
+    * **Concepte**: Identificar i inicialitzar discos durs sencers o particions d'aquests discs perquè puguin ser gestionats per LVM. Són els components bàsics d'emmagatzematge.
+    * **Comanda clau**: `pvcreate /dev/sdXN` (Ex: `pvcreate /dev/sdb1`)
+
+2.  **Crear Grups de Volums (VGs)**
+    * **Concepte**: Agrupar un o més Volums Físics (PVs) per formar un gran "pool" d'emmagatzematge unificat. Aquesta és la primera capa d'abstracció.
+    * **Comanda clau**: `vgcreate <nom_VG> /dev/sdXN [altra_pv]` (Ex: `vgcreate vg_dades /dev/sdb1 /dev/sdc1`)
+
+3.  **Crear Volums Lògics (LVs)**
+    * **Concepte**: "Tallar" o assignar seccions d'espai del Grup de Volums (VG) per crear volums lògics. Aquests LVs són les unitats que el sistema operatiu veurà i utilitzarà com a particions.
+    * **Comanda clau**: `lvcreate -L <mida> -n <nom_LV> <nom_VG>` (Ex: `lvcreate -L 50G -n lv_home vg_dades`)
+
+4.  **Formatejar Volums Lògics (LVs)**
+    * **Concepte**: Un cop creat el LV, cal formatar-lo amb un sistema de fitxers (ext4, XFS, etc.) perquè pugui emmagatzemar dades.
+    * **Comanda clau**: `mkfs.<tipus_fs> /dev/<nom_VG>/<nom_LV>` (Ex: `mkfs.ext4 /dev/vg_dades/lv_home`)
+
+5.  **Muntar Volums Lògics (LVs)**
+    * **Concepte**: Connectar el Volum Lògic formatat a un directori del sistema (punt de muntatge) perquè les dades hi siguin accessibles.
+    * **Comanda clau**: `mount /dev/<nom_VG>/<nom_LV> /punt/de/muntatge` (Ex: `mount /dev/vg_dades/lv_home /home`)
+    * Per fer el muntatge persistent després d'un reinici, cal afegir l'entrada a `/etc/fstab`.
 
 ### Nomenclatura
 
@@ -398,3 +428,70 @@ sudo mkfs.ext4 /dev/sdXN    # Per crear un sistema de fitxers ext4
 sudo mkfs.fat -F 32 /dev/sdXN # Per crear FAT32
 sudo mkfs.ntfs /dev/sdXN    # Per crear NTFS (necessites instal·lar ntfs-3g)
 # Substitueix X per la lletra del disc i N pel número de partició.
+````
+#### 5. Muntatge
+Un cop preparat, amb la comanda `mount`s'asigna un punt de montatge on podrem fer servir el volum.
+````bash
+mount /dev/sdXN /mnt
+````
+
+## Distribucions de Volums (RAIDs) i Còpies de Seguretat
+
+### 1. Distribucions de Volums: RAID (Redundant Array of Independent Disks)
+
+RAID combina múltiples discos físics per formar una o més unitats lògiques, millorant el rendiment o la redundància de dades.
+
+* **RAID 0 (Striping)**:
+    * **Objectiu**: Millorar el **rendiment**.
+    * **Funcionament**: Les dades es divideixen en blocs i s'escriuen simultàniament a tots els discos.
+    * **Inconvenient**: **No hi ha redundància**. Si un disc falla, es perden totes les dades del RAID.
+
+![image](https://github.com/user-attachments/assets/3a24468f-8026-47c9-8fd1-1384e383a800)
+
+* **RAID 1 (Mirroring)**:
+    * **Objectiu**: Millorar la **redundància de dades** (tolerància a fallades).
+    * **Funcionament**: Les dades es copien exactament en dos o més discos.
+    * **Inconvenient**: Pèrdua de la meitat de la capacitat total dels discos (ex: 2 discos de 1TB = 1TB útil).
+
+![image](https://github.com/user-attachments/assets/81a2eb5f-d51a-4cdf-9d3c-e95868755bc9)
+
+* **RAID 5 (Striping amb Paritat Distribuïda)**:
+    * **Objectiu**: Bon equilibri entre **rendiment, redundància i capacitat**.
+    * **Funcionament**: Les dades i la informació de paritat (per a recuperació) es distribueixen uniformement entre un mínim de 3 discos.
+    * **Avantatge**: Pot sobreviure a la fallada d'un sol disc.
+    * **Capacitat**: (N-1) * mida del disc més petit (on N és el nombre de discos).
+
+![image](https://github.com/user-attachments/assets/20bf98e4-8014-4428-95d8-be96956e2e52)
+
+* **RAID 6 (Striping amb Doble Paritat Distribuïda)**:
+    * **Objectiu**: Major **redundància** que RAID 5.
+    * **Funcionament**: Similar a RAID 5, però amb dues informacions de paritat distribuïdes. Requereix un mínim de 4 discos.
+    * **Avantatge**: Pot sobreviure a la fallada de fins a dos discos simultàniament.
+
+![image](https://github.com/user-attachments/assets/89f4ce1c-3f78-4f9b-a006-660ce4b25b69)
+
+---
+
+## Tipus de Còpies de Seguretat (Backups)
+
+Una còpia de seguretat és una còpia de dades per restaurar-les en cas de pèrdua de dades originals.
+
+* **Còpia de Seguretat Completa (Full Backup)**:
+    * **Funcionament**: Es copien **totes les dades** seleccionades cada vegada.
+    * **Avantatge**: Restauració més ràpida i senzilla (només es necessita l'última còpia).
+    * **Inconvenient**: Requereix més espai i més temps per realitzar-se.
+
+* **Còpia de Seguretat Incremental (Incremental Backup)**:
+    * **Funcionament**: Després de la primera còpia completa, només es copien els fitxers que han **canviat des de l'última còpia de qualsevol tipus** (completa o incremental anterior).
+    * **Avantatge**: Molt ràpida i eficient en l'espai.
+    * **Inconvenient**: La restauració és més complexa i lenta, ja que es necessita la còpia completa inicial i *totes* les còpies incrementals posteriors en ordre.
+
+![image](https://github.com/user-attachments/assets/470f726e-1c2f-4ac8-9ff0-1654da2780bc)
+
+* **Còpia de Seguretat Diferencial (Differential Backup)**:
+    * **Funcionament**: Després de la primera còpia completa, només es copien els fitxers que han **canviat des de l'última còpia COMPLETA**.
+    * **Avantatge**: Més ràpida i amb menys requisits d'espai que la completa. La restauració és més senzilla que la incremental (només necessites la darrera completa i la darrera diferencial).
+    * **Inconvenient**: Cada còpia diferencial es fa més gran amb el temps fins a la següent còpia completa.
+ 
+![image](https://github.com/user-attachments/assets/70a2f3f8-fc92-4cc9-8574-5f70f4127522)
+
